@@ -1,0 +1,40 @@
+- name: install the elastic search component
+  hosts: elasticsearch
+  become: yes
+  tasks:
+    - name: Install the java
+      ansible.builtin.yum:
+        name: java-11-openjdk-devel
+        state: installed
+
+    - name: copying the repo file to yum repository
+      ansible.builtin.copy:
+        src: elasticsearch.repo
+        dest: /etc/yum.repos.d/elasticsearch.repo
+
+    - name: Install the elastic search
+      ansible.builtin.yum:
+        name: elasticsearch 
+        state: installed
+
+    - name: Set Elasticsearch HTTP Port
+      lineinfile:
+        path: /etc/elasticsearch/elasticsearch.yml
+        regexp: '^http.port:'
+        line: 'http.port: 9200'
+
+    - name: Set Elasticsearch Network Host
+      lineinfile:
+        path: /etc/elasticsearch/elasticsearch.yml
+        regexp: '^network.host:'
+        line: 'network.host: 0.0.0.0'
+
+    - name: Add Discovery Section Line
+      lineinfile:
+        path: /etc/elasticsearch/elasticsearch.yml
+        line: 'discovery.type: single-node'  # Replace with your desired line
+
+    - name: enable the service
+      ansible.builtin.service:
+        name: elasticsearch
+        enabled: yes
