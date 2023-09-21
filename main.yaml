@@ -17,22 +17,23 @@
         name: elasticsearch 
         state: installed
 
-    - name: Set Elasticsearch HTTP Port
-      lineinfile:
-        path: /etc/elasticsearch/elasticsearch.yml
-        regexp: '^http.port:'
-        line: 'http.port: 9200'
+    - name: Replace two elements
+      ansible.builtin.replace:
+        path: /etc/elasticsearch/elasticsearch.yml  # Replace with the actual file path
+        regexp:
+          - '#network.host: 192.168.0.1'  # First element's regex pattern
+          - '#http.port: 9200'  # Second element's regex pattern
+        replace:
+          - 'network.host: 0.0.0.0'  # First element's replacement value
+          - 'http.port: 9200'  # Second element's replacement value
 
-    - name: Set Elasticsearch Network Host
+    - name: Add Line Under Discovery Section
       lineinfile:
         path: /etc/elasticsearch/elasticsearch.yml
-        regexp: '^network.host:'
-        line: 'network.host: 0.0.0.0'
-
-    - name: Add Discovery Section Line
-      lineinfile:
-        path: /etc/elasticsearch/elasticsearch.yml
+        regexp: '^discovery\..*'  # Match any line starting with 'discovery.'
+        insertafter: '^discovery:'  # Insert the line after the 'discovery:' line
         line: 'discovery.type: single-node'  # Replace with your desired line
+
 
     - name: enable the service
       ansible.builtin.service:
